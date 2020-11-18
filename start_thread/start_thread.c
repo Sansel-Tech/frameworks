@@ -6,7 +6,83 @@
 #include <pthread.h>
 
 /*
-	We are executing this function as seperate thread.
+  Function    : start_sync_thread() -- Create blocking thread
+  Description : Caller thread will block/wait until the new thread gets exit
+
+  Arguments   :
+    api  --   Function to call as new thread
+    args --   Arguments to the newly created thread function
+*/
+int start_sync_thread(void *api, void *args)
+{
+	int retval = -1;
+	int   tret = -1;
+	pthread_t tid = -1;
+
+	do {
+		printf("\nmain thread: creating new sync thread ...\n");
+		retval = pthread_create(&tid, NULL, api, args);
+		if (retval < 0) {
+			printf("%s: pthread_create() failed: %s\n", __func__, strerror(errno));
+			retval = -1;
+			break;
+		}
+
+		printf("main thread: in wait ...\n");
+
+		/*
+		   pthread_join() is used to hold the caller thread to block/wait until the new thread gets exit
+		   This function also, collect the exit status of the threaded function and store it in 'tret'.
+		*/
+		retval = pthread_join(tid, (void *)&tret);
+		if (retval < 0) {
+			printf("%s: pthread_join() failed: %s\n", __func__, strerror(errno));
+			retval = -1;
+			break;
+		}
+
+		printf("main thread: received thread retval = %d\n", tret);
+		retval = 0;
+	} while(0);
+
+	return retval;
+}
+
+
+/*
+  Function    : start_async_thread() -- Create non-blocking thread
+  Description : Caller thread will not block/wait for the new thread to exit
+                Both threads will run simultaneously
+  Arguments   :
+    api  --   Function to call as new thread
+    args --   Arguments to the newly created thread function
+*/
+int start_async_thread(void *api, void *args)
+{
+	int retval = -1;
+	int   tret = -1;
+	pthread_t tid = -1;
+
+	do {
+		printf("\nmain thread: creating new async thread ...\n");
+		retval = pthread_create(&tid, NULL, api, args);
+		if (retval < 0) {
+			printf("%s: pthread_create() failed: %s\n", __func__, strerror(errno));
+			retval = -1;
+			break;
+		}
+
+		printf("main thread: new async thread created ...\n");
+		retval = 0;
+	} while(0);
+
+	return retval;
+}
+
+
+/*
+  Sample code to use the above pthread plugins:
+  We are going to execute this function as seperate thread.
 */
 void *thread_function(void *data)
 {
@@ -28,81 +104,6 @@ void *thread_function(void *data)
 	retval = (void *)55;
 	pthread_exit(retval);
 }
-
-
-/*
-	Function    : start_sync_thread() -- Create blocking thread
-	Description : Caller thread will block/wait until the new thread gets exit
-
-	Arguments   :
-		api  --   Function to call as new thread
-	    args --   Arguments to the newly created thread function
-*/
-int start_sync_thread(void *api, void *args)
-{
-    int retval = -1;
-	int   tret = -1;
-    pthread_t tid = -1;
-
-    do {
-		printf("\nmain thread: creating new sync thread ...\n");
-        retval = pthread_create(&tid, NULL, api, args);
-        if (retval < 0) {
-            printf("%s: pthread_create() failed: %s\n", __func__, strerror(errno));
-            retval = -1;
-            break;
-        }
-
-		printf("main thread: in wait ...\n");
-
-		/*
-		   pthread_join() is used to hold the caller thread to block/wait until the new thread gets exit
-		   This function also, collect the exit status of the threaded function and store it in 'tret'.
-		*/
-		retval = pthread_join(tid, (void *)&tret);
-        if (retval < 0) {
-            printf("%s: pthread_join() failed: %s\n", __func__, strerror(errno));
-            retval = -1;
-            break;
-        }
-
-		printf("main thread: received thread retval = %d\n", tret);
-		retval = 0;
-    } while(0);
-
-    return retval;
-} 
-
-
-/*
-	Function    : start_async_thread() -- Create non-blocking thread
-	Description : Caller thread will not block/wait for the new thread to exit
-	              Both threads will run simultaneously
-	Arguments   :
-		api  --   Function to call as new thread
-	    args --   Arguments to the newly created thread function
-*/
-int start_async_thread(void *api, void *args)
-{
-    int retval = -1;
-	int   tret = -1;
-    pthread_t tid = -1;
-
-    do {
-		printf("\nmain thread: creating new async thread ...\n");
-        retval = pthread_create(&tid, NULL, api, args);
-        if (retval < 0) {
-            printf("%s: pthread_create() failed: %s\n", __func__, strerror(errno));
-            retval = -1;
-            break;
-        }
-
-		printf("main thread: new async thread created ...\n");
-		retval = 0;
-    } while(0);
-
-    return retval;
-} 
 
 
 int main()
