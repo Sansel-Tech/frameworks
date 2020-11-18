@@ -143,7 +143,7 @@ int main()
 
 		If not, all running child thread will killed on the exit of main thread 
 	*/
-	//pthread_exit(NULL);
+	pthread_exit(NULL);
 	//return 0;
 }
 
