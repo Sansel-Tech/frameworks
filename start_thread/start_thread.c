@@ -139,10 +139,10 @@ int main()
 	retval = start_async_thread(thread_function, msg);
 
 	/*
-		Using pthread_exit() at the end of the main() will hold/wait the main thread
-		until the newly created threads get exits.
+	  Using pthread_exit() at the end of the main() will hold/wait the main thread
+	  until the newly created threads get exits.
 
-		If not, all running child thread will killed on the exit of main thread 
+	  If not, all running child thread will killed on the exit of main thread 
 	*/
 	pthread_exit(NULL);
 	//return 0;
